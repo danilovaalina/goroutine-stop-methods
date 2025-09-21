@@ -2,6 +2,7 @@ package main
 
 import (
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -9,13 +10,13 @@ import (
 
 func main() {
 	var (
-		stop bool
+		stop atomic.Bool
 		wg   sync.WaitGroup
 	)
 
 	wg.Go(func() {
 		for {
-			if stop {
+			if stop.Load() {
 				log.Info().Msg("stop goroutine on condition")
 				return
 			}
@@ -25,6 +26,6 @@ func main() {
 	})
 
 	time.Sleep(time.Second)
-	stop = true
+	stop.Store(true)
 	wg.Wait()
 }
